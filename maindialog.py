@@ -100,12 +100,12 @@ class MainDialog(QDialog, Ui_MainDialog):
 #            layer_parent = tree_layer.parent()
 #            item = TreeLayerItem(self.iface, layer, self.layersTree)
 #            if layer_parent.parent() is None:
-                # Layer parent is a root node.
-                # This is an orphan layer (has no parent) :(
+#                # Layer parent is a root node.
+#                # This is an orphan layer (has no parent) :(
 #                self.layers_item.addChild(item)
 #            else:
 #                item.parent().addLayer(item)
-                # Layer parent is not a root, it's a group then
+#                # Layer parent is not a root, it's a group then
 #                if layer_parent not in tree_groups:
 #                    tree_groups.append(layer_parent)
 
@@ -180,9 +180,10 @@ class MainDialog(QDialog, Ui_MainDialog):
 
     def previewLeaflet(self):
         self.preview.settings().clearMemoryCaches()
+        testLeaflet(self.layers_item)
         layers, groups, popup, visible, json, cluster, labels = self.getLayersAndGroups()
         params = self.getParameters()
-        previewFile = writeLeaflet(self.iface, utils.tempFolder(), 500, 700, 1, layers, visible, "", cluster, "", "", "", "", labels, 0, 0, json, params, popup)
+        previewFile = writeLeaflet(self.iface, self.layers_item, utils.tempFolder(), 500, 700, 1, layers, visible, "", cluster, "", "", "", "", labels, 0, 0, json, params, popup)
         self.preview.setUrl(QUrl.fromLocalFile(previewFile))
         self.labelPreview.setText('Preview &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="open">Open in external browser</a>')
 
