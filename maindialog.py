@@ -180,7 +180,6 @@ class MainDialog(QDialog, Ui_MainDialog):
 
     def previewLeaflet(self):
         self.preview.settings().clearMemoryCaches()
-        testLeaflet(self.layers_item)
         layers, groups, popup, visible, json, cluster, labels = self.getLayersAndGroups()
         params = self.getParameters()
         previewFile = writeLeaflet(self.iface, self.layers_item, utils.tempFolder(), 500, 700, 1, layers, visible, "", cluster, "", "", "", "", labels, 0, 0, json, params, popup)

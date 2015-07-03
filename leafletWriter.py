@@ -663,7 +663,3 @@ def writeLeaflet(iface, layerTree, outputProjectFileName, width, height, full, l
         f12.write(end)
         f12.close()
     return outputIndex
-
-
-def testLeaflet(layerTree):
-    layerTree.setText(0, "Ext. func. called!")
