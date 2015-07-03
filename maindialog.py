@@ -48,7 +48,7 @@ class MainDialog(QDialog, Ui_MainDialog):
         self.setupUi(self)
         self.iface = iface
         self.paramsTreeOL.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.populate_layers_and_groups()
+        self.populate_layers_and_groups(self.iface)
         self.populateConfigParams(self)
         self.paramsTreeOL.itemClicked.connect(self.changeSetting)
         self.paramsTreeOL.itemChanged.connect(self.saveSettings)
@@ -82,35 +82,39 @@ class MainDialog(QDialog, Ui_MainDialog):
         if url == "open":
             webbrowser.open_new_tab(self.preview.url().toString())
 
-    def populate_layers_and_groups(self):
+    def populate_layers_and_groups(self, iface):
         """Populate layers on QGIS into our layers and group tree view."""
+        self.iface = iface
         root_node = QgsProject.instance().layerTreeRoot()
         # All tree group
         tree_groups = []
         # Get all the tree layers
-        tree_layers = root_node.findLayers()
+        # tree_layers = root_node.findLayers()
         self.layers_item = QTreeWidgetItem()
         self.layers_item.setText(0, "Layers and Groups")
 
-        for tree_layer in tree_layers:
-            layer = tree_layer.layer()
-            layer_parent = tree_layer.parent()
-            if layer_parent.parent() is None:
+        traverseTree(root_node, self.iface, self.layersTree, self.layers_item)
+
+#        for tree_layer in tree_layers:
+#            layer = tree_layer.layer()
+#            layer_parent = tree_layer.parent()
+#            item = TreeLayerItem(self.iface, layer, self.layersTree)
+#            if layer_parent.parent() is None:
                 # Layer parent is a root node.
                 # This is an orphan layer (has no parent) :(
-                item = TreeLayerItem(self.iface, layer, self.layersTree)
-                self.layers_item.addChild(item)
-            else:
+#                self.layers_item.addChild(item)
+#            else:
+#                item.parent().addLayer(item)
                 # Layer parent is not a root, it's a group then
-                if layer_parent not in tree_groups:
-                    tree_groups.append(layer_parent)
+#                if layer_parent not in tree_groups:
+#                    tree_groups.append(layer_parent)
 
-        for tree_group in tree_groups:
-            group_name = tree_group.name()
-            group_layers = [
-                tree_layer.layer() for tree_layer in tree_group.findLayers()]
-            item = TreeGroupItem(group_name, group_layers, self.layersTree)
-            self.layers_item.addChild(item)
+#        for tree_group in tree_groups:
+#            group_name = tree_group.name()
+#            group_layers = [
+#                tree_layer.layer() for tree_layer in tree_group.findLayers()]
+#            item = TreeGroupItem(group_name, group_layers, self.layersTree)
+#            self.layers_item.addChild(item)
 
         self.layersTree.addTopLevelItem(self.layers_item)
         self.layersTree.expandAll()
@@ -257,9 +261,9 @@ class TreeGroupItem(QTreeWidgetItem):
 
     groupIcon = QIcon(os.path.join(os.path.dirname(__file__), "icons", "group.gif"))
 
-    def __init__(self, name, layers, tree):
+    def __init__(self, name, tree):
         QTreeWidgetItem.__init__(self)
-        self.layers = layers
+        # self.layers = layers
         self.name = name
         self.setText(0, name)
         self.setIcon(0, self.groupIcon)
@@ -406,3 +410,15 @@ class TreeSettingItem(QTreeWidgetItem):
             return self.combo.currentText()
         else:
             return self.text(1)
+
+
+def traverseTree(node, iface, tree, treeItem):
+    children = node.children()
+    for child in children:
+        if isinstance(child, QgsLayerTreeGroup):
+            item = TreeGroupItem(child.name(), tree)
+            treeItem.addChild(item)
+            traverseTree(child, iface, tree, item)
+        else:
+            item = TreeLayerItem(iface, child.layer(), tree)
+            treeItem.addChild(item)
