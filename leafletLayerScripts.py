@@ -71,7 +71,7 @@ def restackLayers(layerName, visible):
         return """
         layerOrder[layerOrder.length] = json_{layerName}JSON;
         for (index = 0; index < layerOrder.length; index++) {{
-            feature_group.removeLayer(layerOrder[index]); feature_group.addLayer(layerOrder[index]);
+            layerOrder[index].bringToFront();
         }}""".format(layerName=layerName)
     else:
         return ""
